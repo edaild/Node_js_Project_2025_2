@@ -1,7 +1,11 @@
+const {add} = require("./math.js");
+
 // 변수 선언
 let num = 42;           // int
 var name = "TOM";       // string
 let isStudent = true;   // bool
+
+console.log(add(num, num));
 
 // 배열
 let color = ["rad", "green", "blue"];
@@ -27,3 +31,21 @@ else{
 for(var i = 0; i < 5; i++){
     console.log(i);
 }
+
+// 비동기 콜백
+setTimeout(()=>{
+    console.log("Delayed Message 1");
+}, 1000);                   //1초
+
+setTimeout(()=>{
+    console.log("Delayed Message 2");
+}, 750);                   //0.75초
+
+setTimeout(()=>{
+    console.log("Delayed Message 3");
+}, 2000);                   //2초
+
+setTimeout(()=>{
+    console.log("Delayed Message 4");
+}, 500);                   //0.5초
+
