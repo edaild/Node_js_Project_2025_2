@@ -11,7 +11,7 @@ app.get("/", (req, res) => {
     let result =                                                // Json 형태로 선언 후 사용
     {
         cmd : -1,
-        message : 'Hello world'
+        message : 'Hello world!'
     }
 
     res.send(result);                                           // 요청에 응답을 한다.
