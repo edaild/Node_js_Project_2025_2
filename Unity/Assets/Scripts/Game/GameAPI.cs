@@ -50,7 +50,7 @@ public class GameAPI : MonoBehaviour
             byte[] bodyRaw = Encoding.UTF8.GetBytes(jsonData);
             request.uploadHandler = new UploadHandlerRaw(bodyRaw);
             request.downloadHandler = new DownloadHandlerBuffer();
-            request.SetRequestHeader("Content-type", "applicarion/json");
+            request.SetRequestHeader("Content-type", "application/json");
 
             yield return request.SendWebRequest();
 
