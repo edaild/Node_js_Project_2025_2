@@ -1,0 +1,17 @@
+-- 4.플레이어 데이터 조회
+SELECT * FROM players;
+SELECT username, last_login from players;
+
+-- 5.특정 플레이어 정버 업데이트
+UPDATE player SET last_login = CURRENT_TIMESTAMP WHERE username = 'hero123'
+
+-- 6. 조건에 맞는 플레이어 검색
+-- SELECT username, email FROM players WHERE username LIKE '%hero%'
+
+-- 7. 플레이어 삭제
+DELETE FROM players WHERE username = 'hero123'
+
+-- 8. 플레이어 테이블 에서 새열 추가
+ALTER TABLE players ADD COLUMN 'level' + 1
+
+-- 9. 

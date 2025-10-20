@@ -39,15 +39,15 @@ app.post('/login', async(req, res) =>{
     const user = user.find(user => user.username === username);
 
     if(!user || !(await bcrypt.compare(password, user.password))){
-        return res.status(400).json({error : '잘못된 사용자명 또는 비밀 번호 입니다.'});
+        return res.status(400).json({error : '잘못된 사용자명 또는 비밀번호 입니다.'});
     }
     
     const accessToken = generateAccessToken(username);
     console.log(accessToken);
-    const refreshTokens = jwt.sign({username}, REFRESH_TOKEN_SECRET);
+    const refreshToken = jwt.sign({username}, REFRESH_TOKEN_SECRET);
 
-    refreshTokens[refreshTokens] = username;
-    res.json({accessToken, refreshTokens});
+    refreshTokens[refreshToken] = username;
+    res.json({accessToken, refreshToken});
 })
 
 // 엑세스 토큰 생성 함수
