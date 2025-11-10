@@ -8,7 +8,7 @@ const pool = mysql.createPool({
     host : 'locolhost',
     user : 'root',
     password : '1234',
-    database : 'gametest'
+    database : 'gamtetest'
     
 });
 
@@ -33,7 +33,7 @@ app.post('/login', async (req, res) =>{
             }
     }
     catch(error){
-        res.status(500).json({success: false, massage : error.message});
+        res.status(500).json({success: false, message : error.message});
     }
 });
 
@@ -50,27 +50,33 @@ app.get('/inventory/:playerId', async (req,res)=>{
             res.json(inventory)
     }
     catch(error){
-        res.status(500).json({success: false, massage : error.message});
+        res.status(500).json({success: false, message : error.message});
     }
 });
 
 // 퀘스트 목록 조회
-app.get('/quests/playerID', async (req,res) => {
-    console.log("서버 호출")
-    try{
-                console.log("try 문 시작 지점")
-            const[quests] = await pool.query(
+app.get('/quests/:playerId' , async (req,res) => {
 
-                'SELECT q.title, pq.`STATUS`FROM player_quests pq JOIN quests q ON pq.quest_id = q.Quest_id WHERE pq.player_id',
-                [req.params.playerId]
-            );
-            console.log(quests);
-            res.json(quests);
+    console.log(req.params.playerId);
+
+    try
+    {
+        console.log("try 문 진입");
+        const[quests] = await pool.query (
+            'SELECT q.* , pq.`STATUS`FROM player_quests pq JOIN quests q ON pq.quest_id = q.quest_id WHERE pq.player_id = ?',
+            [req.params.playerId]
+        );
+
+        console.log(quests);
+        res.json(quests);
     }
-    catch(error){
-        res.status(500).json({success: false, massage : error.message});
+    catch(error)
+    {
+        res.status(500).json({success: false, message : error.message});
+        console.log('서버 오류');
     }
-});
+
+})
 
 const PORT = 3000;
 

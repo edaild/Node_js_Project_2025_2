@@ -1,0 +1,1 @@
+SELECT q.*, pq.`STATUS` FROM player_quests pq JOIN quests q ON pq.quest_id = q.Quest_id WHERE pq.player_id
