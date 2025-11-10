@@ -78,7 +78,7 @@ public class AuthManager : MonoBehaviour
         var user = new { username, password };
         var jsonData = JsonConvert.SerializeObject(user);
 
-        using (UnityWebRequest www = UnityWebRequest.PostWwwForm($"{SERVER_URL}/register", "POST"))
+        using (UnityWebRequest www = UnityWebRequest.PostWwwForm($"{SERVER_URL}/login", "POST"))
         {
             byte[] boayRaw = Encoding.UTF8.GetBytes(jsonData);
             www.uploadHandler = new UploadHandlerRaw(boayRaw);

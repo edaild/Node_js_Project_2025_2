@@ -33,19 +33,20 @@ app.post('/register', async(req, res) =>{
     res.status(201).json({messge : '회원 가입 성공'}) 
 })
 
-app.post('/login', async(req, res) =>{
-
-    const {username, password} = req.body;
-    const user = user.find(user => user.username === username);
-
-    if(!user || !(await bcrypt.compare(password, user.password))){
-        return res.status(400).json({error : '잘못된 사용자명 또는 비밀번호 입니다.'});
-    }
+app.post('/login' , async(req , res) => {
     
+    const {username, password} = req.body;
+    const user = users.find(user => user.username === username);
+
+    if(!user || !(await bcrypt.compare(password, user.password)))
+    {
+        return res.status(400).json({error : '잘못된 사용자명 또는 비밀 번호 입니다.'});
+    }
+
     const accessToken = generateAccessToken(username);
     console.log(accessToken);
-    const refreshToken = jwt.sign({username}, REFRESH_TOKEN_SECRET);
-
+    const refreshToken = jwt.sign({username} , REFRESH_TOKEN_SECRET);
+    
     refreshTokens[refreshToken] = username;
     res.json({accessToken, refreshToken});
 })
