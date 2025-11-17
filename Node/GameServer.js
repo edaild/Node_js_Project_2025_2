@@ -5,10 +5,10 @@ const app = express();
 app.use(express.json());
 
 const pool = mysql.createPool({
-    host : 'locolhost',
+    host : 'localhost',
     user : 'root',
     password : '1234',
-    database : 'gamtetest'
+    database : 'gametest'
     
 });
 
@@ -58,7 +58,6 @@ app.get('/inventory/:playerId', async (req,res)=>{
 app.get('/quests/:playerId' , async (req,res) => {
 
     console.log(req.params.playerId);
-
     try
     {
         console.log("try 문 진입");

@@ -61,7 +61,7 @@ public class GameDataManager : MonoBehaviour
     {
         //if(currentPlayer == null) yield break;
 
-        using (UnityWebRequest www= UnityWebRequest.Get($"{serverUrl}/quests/{currentPlayer.player_id}"))
+        using (UnityWebRequest www = UnityWebRequest.Get($"{serverUrl}/quests/{currentPlayer.player_id}"))
         {
             yield return www.SendWebRequest();
 
