@@ -1,11 +1,10 @@
-const webSocket = require('ws');
+const WebSocket = require('ws');
 const iconv = require('iconv-lite');
-const { json } = require('body-parser');
 
 class GameServer {
 
     constructor(port){
-        this.wss = new webSocket.Server({port});
+        this.wss = new WebSocket.Server({port});
         this.clients = new Set();
         this.players = new Map();
         this.SetupServerEvent();
@@ -14,75 +13,126 @@ class GameServer {
 
     SetupServerEvent()
     {
-          this.wss.on('connection', (socket) =>{
+        this.wss.on('connection' , (socket) => {
             this.clients.add(socket);
             const playerId = this.generatePlayerId();
 
             this.players.set(playerId, {
                 socket : socket,
-                position : {x:0, y:0, z:0}
+                position: { x:0, y:0, z:0},
+                rotation: { x:0, y:0, z:0}
             });
-            console.log(`크라이언트 접속! ID : ${playerId}, 현재 접속자 ${this.clients.size}`);
+            console.log(`클라이언트 접속! ID : ${playerId}, 현재 접속자 : ${this.clients.size}`);
 
             const welcomData = {
                 type : 'connection',
                 playerId : playerId,
-                message : '서버에 연결 되었습니다.'
+                message : '서버에 연결 되었습니다!'
             };
+
+            // 기존 플레이어를 정보를 새 플레이어에게 전송
+            this.players.forEach((player, pid)=>{
+                if(pid !== playerId){
+                    const joinMsg = {
+                        type : 'playerJoin',
+                        playerId : pid,
+                        position : player.position,
+                        rotation : player.position
+                    };
+                    socket.send(JSON.stringify(joinMsg));
+                    console.log(`기존 플레이어 정보 전송 : ${pid} -> ${playerId}`);
+                }
+            });
 
             socket.send(JSON.stringify(welcomData));
 
-            socket.on('message', (message) =>
-                {
-                    try
-                    {
-                        const data = JSON.parse(message);
-                        console.log('수신되 메세지 :', data);
-
-                        // 채팅 메세지 브로드캐스트(보내 사람 정보 포함)
-                        this.broadcast({
-                            type : 'chat',
-                            playerId: playerId,
-                            message : data.message
-                        })
-                    }
-                    catch
-                    {
-                        console.log('메세지 파싱 에러 : ', error);
-                    }
-                });
-                socket.on('close', ()=> {
-                    this.clients.delete(socket);
-                    this.players.delete(playerId);
-
-                    this.broadcast({
-                        type : 'playerDisconnect',
-                        playerId : playerId
-                    });
-                    
-                    console.log(`클라이언트 퇴장 ID : ${playerId}, 현재 접속자 : ${this.clients.size}`);
-                });
-
-                socket.on('error', (error) =>{
-                    console.log('소켓 에러 : ', error);
-                });
-        });
-    }
-
-    broadcast(dta){
-        const message = JSON.stringify(data);
-        this.clients.forEach(client => {
-            if(client.readyState === webSocket.OPEN)
+            socket.on('message' , (message) =>
             {
-                client.send(message);   
-            }
+                try
+                {
+                    const data = JSON.parse(message);
+
+                    if(data.type === 'chat')
+                    {
+                         console.log('수신된 메세지  :' , data);
+
+                    //채팅 메세지 브로드캐스트(보내 사람 정보 포함)
+                    this.broadcast({
+                        type: 'chat',
+                        playerId: playerId,
+                        message: data.message
+                    });
+                    }
+                    else if(data.type === 'positionUpdata')
+                    {
+                        const player = this.players.get(playerid);
+                        if(player)
+                        {
+                            player.position = data.position;
+                        }
+                        if(data.rotation){
+                            player.rotation = data.rotation;
+                        }
+                        // 다른 플레이어에게 브로드 캐스트
+                        const updataMsg = {
+                            type : 'positionUpdata',
+                            playerId : playerId,
+                            position : player.position,
+                            rotation : player.rotation
+                        };
+                        this.broadcast(updataMsg, socket);
+                    }
+                }
+                catch
+                {
+                    console.error('메세지 파싱 에러 : ' , error);
+                }
+            });
+
+            socket.on('close', ()=> {
+                this.clients.delete(socket);
+                this.players.delete(playerId);
+
+                this.broadcast({
+                    type : 'playerDisconnect',
+                    playerId : playerId
+                });
+                
+                console.log(`클라이언트 퇴장 ID : ${playerId}, 현재 접속자 : ${this.clients.size}`);
+
+            });
+
+            socket.on('error' , (error) => {
+                console.error('소켓 에러 : ' , error);
+            });
         });
     }
 
-    generatePlayerID()
+    broadcast(data, excludeSocket = null)
+    {
+        const message = JSON.stringify(data);
+        let sentCount = 0;
+        this.clients.forEach(client => 
+        {
+            if(client !== excludeSocket && client.readyState === WebSocket.OPEN) //===는 비교전에 암시적인 형 변환을 하지 않음 (값이나 타입 중 하나라도 다르면 false 반환)
+            {
+                client.send(message);
+                sentCount++;
+            }            
+        });
+        //  디버그 : 브로드캐스트 확인
+        if(data.type !== 'positionUpdata')
+        {
+            console.log(`브로드 캐스트 완료 ${data.type} (${sentCount} 명에게 전송)`);
+        }
+    }
+
+    generatePlayerId()
     {
         return 'player_' + Math.random().toString(36).substr(2,9);
     }
+
 }
 
-const gametestameServer = new GameServer(3000);
+
+const gameServer = new GameServer(3000);
