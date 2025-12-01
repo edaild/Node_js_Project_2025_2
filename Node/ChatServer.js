@@ -8,7 +8,7 @@ class GameServer {
         this.clients = new Set();
         this.players = new Map();
         this.SetupServerEvent();
-        console.log(`게임 서버 포트 ${port}에서 시작 되었습니다.`);
+        console.log(`게임 서버 포트 ${port}에서 시작 되었습니다. `);
     }
 
     SetupServerEvent()
@@ -19,8 +19,7 @@ class GameServer {
 
             this.players.set(playerId, {
                 socket : socket,
-                position: { x:0, y:0, z:0},
-                rotation: { x:0, y:0, z:0}
+                position: { x:0, y:0, z:0}
             });
             console.log(`클라이언트 접속! ID : ${playerId}, 현재 접속자 : ${this.clients.size}`);
 
@@ -30,20 +29,6 @@ class GameServer {
                 message : '서버에 연결 되었습니다!'
             };
 
-            // 기존 플레이어를 정보를 새 플레이어에게 전송
-            this.players.forEach((player, pid)=>{
-                if(pid !== playerId){
-                    const joinMsg = {
-                        type : 'playerJoin',
-                        playerId : pid,
-                        position : player.position,
-                        rotation : player.position
-                    };
-                    socket.send(JSON.stringify(joinMsg));
-                    console.log(`기존 플레이어 정보 전송 : ${pid} -> ${playerId}`);
-                }
-            });
-
             socket.send(JSON.stringify(welcomData));
 
             socket.on('message' , (message) =>
@@ -51,10 +36,7 @@ class GameServer {
                 try
                 {
                     const data = JSON.parse(message);
-
-                    if(data.type === 'chat')
-                    {
-                         console.log('수신된 메세지  :' , data);
+                    console.log('수신된 메세지  :' , data);
 
                     //채팅 메세지 브로드캐스트(보내 사람 정보 포함)
                     this.broadcast({
@@ -62,26 +44,7 @@ class GameServer {
                         playerId: playerId,
                         message: data.message
                     });
-                    }
-                    else if(data.type === 'positionUpdata')
-                    {
-                        const player = this.players.get(playerid);
-                        if(player)
-                        {
-                            player.position = data.position;
-                        }
-                        if(data.rotation){
-                            player.rotation = data.rotation;
-                        }
-                        // 다른 플레이어에게 브로드 캐스트
-                        const updataMsg = {
-                            type : 'positionUpdata',
-                            playerId : playerId,
-                            position : player.position,
-                            rotation : player.rotation
-                        };
-                        this.broadcast(updataMsg, socket);
-                    }
+
                 }
                 catch
                 {
@@ -108,23 +71,16 @@ class GameServer {
         });
     }
 
-    broadcast(data, excludeSocket = null)
+    broadcast(data)
     {
         const message = JSON.stringify(data);
-        let sentCount = 0;
         this.clients.forEach(client => 
         {
-            if(client !== excludeSocket && client.readyState === WebSocket.OPEN) //===는 비교전에 암시적인 형 변환을 하지 않음 (값이나 타입 중 하나라도 다르면 false 반환)
+            if(client.readyState === WebSocket.OPEN) //===는 비교전에 암시적인 형 변환을 하지 않음 (값이나 타입 중 하나라도 다르면 false 반환)
             {
                 client.send(message);
-                sentCount++;
             }            
         });
-        //  디버그 : 브로드캐스트 확인
-        if(data.type !== 'positionUpdata')
-        {
-            console.log(`브로드 캐스트 완료 ${data.type} (${sentCount} 명에게 전송)`);
-        }
     }
 
     generatePlayerId()

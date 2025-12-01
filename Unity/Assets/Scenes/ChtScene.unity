@@ -342,6 +342,9 @@ MonoBehaviour:
   connectButton: {fileID: 820284679}
   chatLog: {fileID: 1381093479}
   statusText: {fileID: 1478816873}
+  localPlayer: {fileID: 0}
+  remotePlayerPrefabs: {fileID: 0}
+  positionSendRate: 0.1
 --- !u!4 &402255768
 Transform:
   m_ObjectHideFlags: 0
